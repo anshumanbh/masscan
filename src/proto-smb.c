@@ -8,6 +8,7 @@
 #include "masscan-app.h"
 #include "siphash24.h"
 #include "string_s.h"
+#include "unusedparm.h"
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
@@ -429,8 +430,8 @@ smb1_parse_negotiate1(struct SMBSTUFF *smb, const unsigned char *px, size_t offs
             break;
     }
     
-    smb->hdr.smb1.byte_state = state;
-    smb->hdr.smb1.byte_offset += (offset - original_offset);
+    smb->hdr.smb1.byte_state = (unsigned short)state;
+    smb->hdr.smb1.byte_offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -471,8 +472,7 @@ smb1_parse_setup1(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, 
         max = offset + (smb->hdr.smb1.byte_count - smb->hdr.smb1.byte_offset);
     
     for (;offset<max; offset++) {
-        printf("%02x ", px[offset]);
-
+        
         switch (state) {
             case D_PADDING:
                 if (smb->hdr.smb1.flags2 & 0x8000) {
@@ -606,8 +606,8 @@ smb1_parse_setup1(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, 
         }
     }
     
-    smb->hdr.smb1.byte_state = state;
-    smb->hdr.smb1.byte_offset += (offset - original_offset);
+    smb->hdr.smb1.byte_state = (unsigned short)state;
+    smb->hdr.smb1.byte_offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 /*****************************************************************************
@@ -661,7 +661,7 @@ smb1_parse_setup2(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, 
                     new_max = offset + smb->parms.setup.BlobLength - smb->parms.setup.BlobOffset;
                 spnego_decode(&smb->spnego, px+offset, new_max-offset, banout);
                 
-                smb->parms.setup.BlobOffset += (new_max-offset);
+                smb->parms.setup.BlobOffset += (uint16_t)(new_max-offset);
                 offset = new_max;
                 if (smb->parms.setup.BlobLength - smb->parms.setup.BlobOffset == 0) {
                     offset--;
@@ -809,8 +809,8 @@ smb1_parse_setup2(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, 
         }
     }
     
-    smb->hdr.smb1.byte_state = state;
-    smb->hdr.smb1.byte_offset += (offset - original_offset);
+    smb->hdr.smb1.byte_state = (unsigned short)state;
+    smb->hdr.smb1.byte_offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -822,7 +822,8 @@ smb1_parse_negotiate2(struct SMBSTUFF *smb, const unsigned char *px, size_t offs
     size_t original_offset = offset;
     unsigned state = smb->hdr.smb1.byte_state;
     
-    
+    UNUSEDPARM(banout);
+
     if (max > offset + (smb->hdr.smb1.byte_count - smb->hdr.smb1.byte_offset))
         max = offset + (smb->hdr.smb1.byte_count - smb->hdr.smb1.byte_offset);
     
@@ -835,8 +836,8 @@ smb1_parse_negotiate2(struct SMBSTUFF *smb, const unsigned char *px, size_t offs
                 break;
         }
     
-    smb->hdr.smb1.byte_state = state;
-    smb->hdr.smb1.byte_offset += (offset - original_offset);
+    smb->hdr.smb1.byte_state = (unsigned short)state;
+    smb->hdr.smb1.byte_offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -852,6 +853,9 @@ smb2_parse_response(struct SMBSTUFF *smb, const unsigned char *px, size_t offset
     size_t original_offset = offset;
     unsigned state = smb->hdr.smb2.state;
     
+    UNUSEDPARM(banout);
+    UNUSEDPARM(px);
+
     if (max > offset + (smb->hdr.smb2.struct_length - smb->hdr.smb2.offset))
         max = offset + (smb->hdr.smb2.struct_length - smb->hdr.smb2.offset);
     
@@ -861,8 +865,8 @@ smb2_parse_response(struct SMBSTUFF *smb, const unsigned char *px, size_t offset
                 break;
         }
     
-    smb->hdr.smb2.state = state;
-    smb->hdr.smb2.offset += (offset - original_offset);
+    smb->hdr.smb2.state = (unsigned short)state;
+    smb->hdr.smb2.offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -1031,8 +1035,8 @@ smb2_parse_negotiate(struct SMBSTUFF *smb, const unsigned char *px, size_t offse
                 break;
         }
     
-    smb->hdr.smb2.state = state;
-    smb->hdr.smb2.offset += (offset - original_offset);
+    smb->hdr.smb2.state = (unsigned short)state;
+    smb->hdr.smb2.offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -1059,7 +1063,9 @@ smb2_parse_setup(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, s
         N_BLOB_LENGTH1, N_BLOB_LENGTH2,
 
     };
-    
+
+    UNUSEDPARM(banout);
+
     if (max > offset + (smb->hdr.smb2.struct_length - smb->hdr.smb2.offset))
         max = offset + (smb->hdr.smb2.struct_length - smb->hdr.smb2.offset);
     
@@ -1088,8 +1094,8 @@ smb2_parse_setup(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, s
                 break;
         }
     
-    smb->hdr.smb2.state = state;
-    smb->hdr.smb2.offset += (offset - original_offset);
+    smb->hdr.smb2.state = (unsigned short)state;
+    smb->hdr.smb2.offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -1210,8 +1216,8 @@ smb2_parse_header(struct SMBSTUFF *smb, const unsigned char *px, size_t offset, 
                 break;
         }
     
-    smb->hdr.smb2.state = state;
-    smb->hdr.smb2.offset += (offset - original_offset);
+    smb->hdr.smb2.state = (unsigned short)state;
+    smb->hdr.smb2.offset += (unsigned short)(offset - original_offset);
     return offset - original_offset;
 }
 
@@ -1492,6 +1498,10 @@ smb_parse_smb(struct SMBSTUFF *smb, const unsigned char *px, size_t max, struct 
             if (smb->hdr.smb1.byte_offset >= smb->hdr.smb1.byte_count) {
                 state = SMB1_DATA_AFTER;
                 i--; /* unconsume byte because of auto-increment */
+                
+                /* close the connection, we've found all we can */
+                if (smb->hdr.smb1.command == 0x73)
+                    tcp_close(more);
             }
             break;
             
@@ -1610,11 +1620,15 @@ smb_parse_smb(struct SMBSTUFF *smb, const unsigned char *px, size_t max, struct 
                 new_max = i + smb->hdr.smb2.blob_length;
             spnego_decode(&smb->spnego, px+i, new_max-i, banout);
             
-            smb->hdr.smb2.blob_length -= (new_max-i);
+            smb->hdr.smb2.blob_length -= (unsigned short)(new_max-i);
             i = new_max;
             if (smb->hdr.smb2.blob_length == 0) {
                 i--;
                 state = SMB2_PARSE_REMAINDER;
+                
+                /* Close the connection when we get a SessionSetup response */
+                if (smb->hdr.smb2.opcode == 1)
+                    tcp_close(more);
             }
         }
             break;
@@ -1624,7 +1638,7 @@ smb_parse_smb(struct SMBSTUFF *smb, const unsigned char *px, size_t max, struct 
             break;
     }
 
-    smb->nbt_length -= i;
+    smb->nbt_length -= (unsigned)i;
     smb->nbt_state = state;
     return i;
 }
@@ -1665,7 +1679,10 @@ smb_parse_record(
         NBT_DRAIN,
         NBT_UNKNOWN,
     };
-    
+
+    UNUSEDPARM(banner1_private);
+    UNUSEDPARM(banner1);
+
     for (i=0; i<max; i++)
         switch (state) {
             case NBT_TYPE:
@@ -1791,7 +1808,7 @@ negot_add_dialect(unsigned char *buf, size_t sizeof_buf, const char *dialect)
     size_t nbt_length;
     size_t dialect_length = strlen(dialect) + 1;
     size_t word_count;
-    size_t byte_count;
+    //size_t byte_count;
     
     /* Parse NetBIOS header */
     if (sizeof_buf < 4 || sizeof_buf + 4 < dialect_length)
@@ -1810,7 +1827,7 @@ negot_add_dialect(unsigned char *buf, size_t sizeof_buf, const char *dialect)
     word_count = buf[36];
     if (word_count != 0)
         return -1;
-    byte_count = buf[37] | buf[38]<<8;
+    //byte_count = buf[37] | buf[38]<<8;
     
     
     
@@ -2032,8 +2049,8 @@ smb_selftest(void)
             }
         }
     }
-#endif
     return 0;
+#endif
 }
 
 /*****************************************************************************

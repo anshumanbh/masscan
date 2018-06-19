@@ -126,7 +126,7 @@ ntlmssp_decode(struct NtlmsspDecode *x,
         return;
     } else if (x->offset) {
         memcpy(x->buf + x->offset, px, length);
-        x->offset += length;
+        x->offset += (unsigned)length;
         if (x->offset < x->length)
             return;
         
@@ -180,7 +180,7 @@ ntlmssp_decode(struct NtlmsspDecode *x,
     /* Parse all the fields */
     for (i=info_offset; i+4<info_offset+info_length && i+4<length; ) {
         unsigned type = px[i] | px[i+1]<<8;
-        unsigned len = px[i+2] | px[i+3]<<8;
+        size_t len = px[i+2] | px[i+3]<<8;
         i += 4;
         
         if (len > info_offset + info_length - i)
@@ -221,7 +221,7 @@ ntlmssp_decode(struct NtlmsspDecode *x,
             default:
                 break;
         }
-        i += len;
+        i += (unsigned)len;
     }
 
     
