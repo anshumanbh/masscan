@@ -20,6 +20,7 @@
 #include "templ-payloads.h"
 #include "templ-port.h"
 #include "crypto-base64.h"
+#include "ranges-avl.h"
 #include "script.h"
 #include "masscan-app.h"
 #include "unusedparm.h"
@@ -321,6 +322,12 @@ masscan_save_state(struct Masscan *masscan)
 }
 
 
+void
+rangelist_add_callback(void *v, unsigned begin, unsigned end)
+{
+    rangelist_add_range(v, begin, end);
+}
+
 /*****************************************************************************
  * Read in ranges from a file
  *
@@ -338,6 +345,7 @@ ranges_from_file(struct RangeList *ranges, const char *filename)
     FILE *fp;
     errno_t err;
     unsigned line_number = 0;
+    struct RavlNode *ravl = ravl_create();
 
 
     err = fopen_s(&fp, filename, "rt");
@@ -412,11 +420,16 @@ ranges_from_file(struct RangeList *ranges, const char *filename)
                         filename, line_number, offset, i, address);
                 exit(1);
             } else {
-                rangelist_add_range(ranges, range.begin, range.end);
+                //rangelist_add_range(ranges, range.begin, range.end);
+                ravl = ravl_insert(range.begin, range.end, ravl);
             }
         }
 
     }
+
+    ravl_enumerate(ravl, rangelist_add_callback, ranges);
+    
+    ravl_free(ravl);
 
     fclose(fp);
 }
